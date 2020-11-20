@@ -16,10 +16,11 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, math
 
 from game import Agent
 
+from pacman import GameState
 
 class ReflexAgent(Agent):
     """
@@ -136,7 +137,76 @@ class MinimaxAgent(AdversarialSearchAgent):
         """
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if gameState.isWin() or gameState.isLose():
+            return scoreEvaluationFunction()#put sth bruh
+
+"""     tree = []
+        overallStateList = []
+        if maxDepth > 0:
+            for agent in range(gameState.getNumAgents()):
+                stateList = []
+                for item in gameState.getLegalActions(agent):
+                    stateList.append(gameState.generateSuccessor(agent, item))
+                overallStateList.append(stateList)
+            for i in overallStateList:
+                for j in i:
+                    tree.append(self.getAllActions(j, maxDepth-1))
+            return tree
+        else:
+            return gameState"""
+    def getAllActions(self, agent, gameState):
+        topTier = []
+        midTier = []
+        botTier = []
+        for item in gameState.getLegalActions(agent):
+            topTier.append(item) #Gets all the highest level actions
+        for i in topTier:
+            tempList = []
+            for item2 in gameState.getLegalActions(i): #Gets all the mid level actions for each top level action
+                tempList.append(item2)
+            midTier.append(tempList)
+        for i in midTier:
+            tempList = []
+            for j in i:
+                tempList2 = []
+                for item3 in gameState.getLegalActions(j): #Gets the lowest level actions based on the mid level actions
+                    tempList2.append(j)
+                tempList.append(tempList2)
+            botTier.append(tempList)
+        return topTier, midTier, botTier
+                
+            
+
+    #This is the bone system
+    def getMax(self, levelState):#Only the pacman state tree, nobody elses
+        maxState = object()
+        maxVal = -math.inf
+        for state in levelState:
+            if scoreEvaluationFunction(state) > maxVal:
+                maxVal = scoreEvaluationFunction(state)
+                maxState = state
+        return maxState
+
+    def getMin(self, levelState):#Only the ghost state tree, nobody elses
+        minState = object()
+        minVal = math.inf
+        for state in levelState:
+            if scoreEvaluationFunction(state) < minVal:
+                minVal = scoreEvaluationFunction(state)
+                minState = state
+        return minState
+
+    
+
+    
+
+    
+        
+            
+            
+            
+        
+        #util.raiseNotDefined()
 
 
 class AlphaBetaAgent(AdversarialSearchAgent):
