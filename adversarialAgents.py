@@ -26,7 +26,6 @@ class ReflexAgent(Agent):
     """
     A reflex agent chooses an action at each choice point by examining
     its alternatives via a state evaluation function.
-
     The code below is provided as a guide.
     """
 
@@ -34,7 +33,6 @@ class ReflexAgent(Agent):
         """
         getAction chooses among the best options according to the evaluation
         function.
-
         getAction takes a GameState and returns some Directions.X
         for some X in the set {NORTH, SOUTH, WEST, EAST, STOP}
         """
@@ -56,12 +54,10 @@ class ReflexAgent(Agent):
         The evaluation function takes in the current and proposed successor
         GameStates (pacman.py) and returns a number, where higher numbers are
         better.
-
         The code below extracts some useful information from the state, like the
         remaining food (newFood) and Pacman position after moving (newPos).
         newScaredTimes holds the number of moves that each ghost will remain
         scared because of Pacman having eaten a power pellet.
-
         Print out these variables to see what you're getting
         """
         # Useful information you can extract from a GameState (pacman.py)
@@ -78,7 +74,6 @@ def scoreEvaluationFunction(currentGameState):
     """
     This default evaluation function just returns the score of the state.
     The score is the same one displayed in the Pacman GUI.
-
     This evaluation function is meant for use with adversarial search agents
     (not reflex agents).
     """
@@ -90,11 +85,9 @@ class AdversarialSearchAgent(Agent):
     This class provides some common elements to all of your
     adversarial searchers.  Any methods defined here will be available
     to the MinimaxPacmanAgent and AlphaBetaPacmanAgent.
-
     You *do not* need to make any changes here, but you can if you want to
     add functionality to all your adversarial search agents.  Please do not
     remove anything, however.
-
     Note: this is an abstract class: one that should not be instantiated.  It's
     only partially specified, and designed to be extended.  Agent (game.py)
     is another abstract class.
@@ -115,23 +108,17 @@ class MinimaxAgent(AdversarialSearchAgent):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
-
         Here are some method calls that might be useful when implementing
         minimax.
-
         gameState.getLegalActions(agentIndex):
         Returns a list of legal actions for an agent
         agentIndex=0 means Pacman, ghosts are >= 1
-
         gameState.generateSuccessor(agentIndex, action):
         Returns the successor game state after an agent takes an action
-
         gameState.getNumAgents():
         Returns the total number of agents in the game
-
         gameState.isWin():
         Returns whether or not the game state is a winning state
-
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
@@ -139,63 +126,37 @@ class MinimaxAgent(AdversarialSearchAgent):
         "*** YOUR CODE HERE ***"
         if gameState.isWin() or gameState.isLose():
             return scoreEvaluationFunction()#put sth bruh
+        stateListsRaw = self.getAllActions(0,gameState, 9)#for 2 ghosts depth is 9, 1 would be 6
+        #Needs to be turned into an actual tree for minimax function implementation
 
-"""     tree = []
-        overallStateList = []
+    def getAllActions(self, agent, gameState, maxDepth): #SET INITIAL VALUE OF MAXDEPTH TO 3X NUMBER OF AGENTS
+        stateList = []
         if maxDepth > 0:
-            for agent in range(gameState.getNumAgents()):
-                stateList = []
-                for item in gameState.getLegalActions(agent):
-                    stateList.append(gameState.generateSuccessor(agent, item))
-                overallStateList.append(stateList)
-            for i in overallStateList:
-                for j in i:
-                    tree.append(self.getAllActions(j, maxDepth-1))
-            return tree
-        else:
-            return gameState"""
-    def getAllActions(self, agent, gameState):
-        topTier = []
-        midTier = []
-        botTier = []
-        for item in gameState.getLegalActions(agent):
-            topTier.append(item) #Gets all the highest level actions
-        for i in topTier:
-            tempList = []
-            for item2 in gameState.getLegalActions(i): #Gets all the mid level actions for each top level action
-                tempList.append(item2)
-            midTier.append(tempList)
-        for i in midTier:
-            tempList = []
-            for j in i:
-                tempList2 = []
-                for item3 in gameState.getLegalActions(j): #Gets the lowest level actions based on the mid level actions
-                    tempList2.append(j)
-                tempList.append(tempList2)
-            botTier.append(tempList)
-        return topTier, midTier, botTier
-                
+            nextAgent = (agent+1)%gameState.getNumAgents()
+            for state in gameState.getLegalActions(agent):
+                stateList.extend(self.getAllActions(nextAgent,state,maxDepth-1))
+            return stateList
+        return [gameState + ""]
             
 
     #This is the bone system
-    def getMax(self, levelState):#Only the pacman state tree, nobody elses
+    def getMax(self, stateList, scoreList):#Evaluates pacman's best course of action
         maxState = object()
         maxVal = -math.inf
-        for state in levelState:
-            if scoreEvaluationFunction(state) > maxVal:
-                maxVal = scoreEvaluationFunction(state)
-                maxState = state
-        return maxState
+        for i in range(len(stateList)):
+            if scoreList[i] > maxVal:
+                maxVal = scoreList[i]
+                maxState = stateList[i]
+        return maxState, maxVal
 
-    def getMin(self, levelState):#Only the ghost state tree, nobody elses
+    def getMin(self, stateList, scoreList):#Evaluates ghosts' best course of action
         minState = object()
         minVal = math.inf
-        for state in levelState:
-            if scoreEvaluationFunction(state) < minVal:
-                minVal = scoreEvaluationFunction(state)
-                minState = state
-        return minState
-
+        for i in range(len(stateList)):
+            if scoreList[i] < minVal:
+                minVal = scoreList[i]
+                minState = stateList[i]
+        return minState, minVal
     
 
     
@@ -228,11 +189,8 @@ def betterEvaluationFunction(currentGameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 3).
-
     DESCRIPTION: <write something here so we know what you did>
     """
 
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
-
-
